@@ -1,0 +1,8 @@
+def Addmod(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, "RWithRs3", code, opt_flags)
+
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = BasicConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = BasicExecute.subst(iop)
+}};

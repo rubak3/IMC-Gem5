@@ -1,0 +1,24 @@
+def format R4Op(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, "RegOp", code, opt_flags)
+
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = BasicConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+
+    # Add rs3 extraction to decode_block
+    decode_block += '''
+        rs3 = bits(machInst, 31, 27) & 0x1F;
+    '''
+
+    # Declare rs3 in header
+    header_output += '''
+        uint8_t rs3;
+    '''
+
+    # Add custom execute code that is properly scoped
+    exec_output = BasicExecute.subst(iop)
+    exec_output += '''
+        RegVal Rs3 = xc->getRegOperand(this, rs3);
+        int64_t Rs3_sd = sext<64>(Rs3);
+    '''
+}};
