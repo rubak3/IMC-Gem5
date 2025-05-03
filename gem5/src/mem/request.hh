@@ -256,6 +256,8 @@ class Request : public Extensible<Request>
         MULMOD               = 0x0010000000000000,
         MULIMC               = 0x0100000000000000,
         INVMOD               = 0x1000000000000000,
+        SUBMOD               = 0x0000000010000000,
+        CMPIMC               = 0x0000000000001000,
 
         /**
          * These flags are *not* cleared when a Request object is
