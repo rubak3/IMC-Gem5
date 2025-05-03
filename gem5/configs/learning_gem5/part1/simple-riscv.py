@@ -44,7 +44,7 @@ import m5
 # import all of the SimObjects
 from m5.objects import *
 
-from m5.objects import SimpleMemory
+from m5.objects import PIMCtrl
 
 # create the system we are going to simulate
 system = System()
@@ -56,7 +56,8 @@ system.clk_domain.voltage_domain = VoltageDomain()
 
 # Set up the system
 system.mem_mode = "timing"  # Use timing accesses
-system.mem_ranges = [AddrRange("512MB")]  # Create an address range
+#system.mem_ranges = [AddrRange("512MB")]  # Create an address range
+system.mem_ranges = [AddrRange("1GB")]
 
 # Create a simple CPU
 # You can use ISA-specific CPU models for different workloads:
@@ -83,8 +84,14 @@ system.cpu.createInterruptController()
 # Create a DDR3 memory controller and connect it to the membus
 #system.mem_ctrl = MemCtrl()
 #system.mem_ctrl.dram = DDR3_1600_8x8()
-system.mem_ctrl = SimpleMemory()
 #system.mem_ctrl.dram.range = system.mem_ranges[0]
+#system.mem_ctrl.port = system.membus.mem_side_ports
+
+#system.mem_ctrl = SimpleMemory()
+#system.mem_ctrl.range = system.mem_ranges[0]
+#system.mem_ctrl.port = system.membus.mem_side_ports
+
+system.mem_ctrl = PIMCtrl()
 system.mem_ctrl.range = system.mem_ranges[0]
 system.mem_ctrl.port = system.membus.mem_side_ports
 
