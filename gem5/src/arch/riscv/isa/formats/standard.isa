@@ -542,21 +542,6 @@ def format CSROp(code, *opt_flags) {{
 }};
 
 def format R4Op(code, *opt_flags) {{
-    fields = ['RD', 'RS1', 'RS2', 'RS3', 'FUNCT3', 'FUNCT7', 'OPCODE']
-    regs = ['destRegIdx(0)', 'srcRegIdx(0)', 'srcRegIdx(1)', 'srcRegIdx(2)']
-    iop = InstObjParams(name, Name, 'RegOp', {
-        'code': code,
-        'regs': ','.join(regs),
-        'fields': ','.join(fields)
-    }, list(opt_flags))
-
-    header_output = BasicDeclare.subst(iop)
-    decoder_output = BasicConstructor.subst(iop)
-    decode_block = BasicDecode.subst(iop)
-    exec_output = BasicExecute.subst(iop)
-}};
-
-def format R4Op2(code, *opt_flags) {{
     fields = ['RS1', 'RS2', 'RS3', 'RS4', 'FUNCT3', 'FUNCT2', 'OPCODE']
     regs = ['srcRegIdx(0)', 'srcRegIdx(1)', 'srcRegIdx(2)', 'srcRegIdx(3)']
     iop = InstObjParams(name, Name, 'RegOp', {
