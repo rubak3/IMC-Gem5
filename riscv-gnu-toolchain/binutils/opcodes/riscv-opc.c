@@ -394,9 +394,11 @@ const struct riscv_opcode riscv_opcodes[] =
 //{"addmod",	0, INSN_CLASS_I, "d,s,t,r", MATCH_ADDMOD, MASK_ADDMOD, match_opcode, 0},
 //{"addmod2",	0, INSN_CLASS_I, "s", MATCH_ADDMOD2, MASK_ADDMOD2, match_opcode, 0},
 {"addmod",	0, INSN_CLASS_C, "s,t,r,l", MATCH_ADDMOD, MASK_ADDMOD, match_opcode, 0},
+{"submod",	0, INSN_CLASS_C, "s,t,r,l", MATCH_SUBMOD, MASK_SUBMOD, match_opcode, 0},
 {"mulmod",	0, INSN_CLASS_C, "s,t,r,l", MATCH_MULMOD, MASK_MULMOD, match_opcode, 0},
 {"mulimc",	0, INSN_CLASS_C, "s,t,l", MATCH_MULIMC, MASK_MULIMC, match_opcode, 0},
 {"invmod",	0, INSN_CLASS_C, "s,t,l", MATCH_INVMOD, MASK_INVMOD, match_opcode, 0},
+{"cmpimc",	0, INSN_CLASS_C, "s,t,l", MATCH_CMPIMC, MASK_CMPIMC, match_opcode, 0},
 {"unimp",       0, INSN_CLASS_C, "",          0, 0xffffU, match_opcode, INSN_ALIAS },
 {"unimp",       0, INSN_CLASS_I, "",          MATCH_CSRRW|(CSR_CYCLE << OP_SH_CSR), 0xffffffffU,  match_opcode, 0 }, /* csrw cycle, x0  */
 {"ebreak",      0, INSN_CLASS_C, "",          MATCH_C_EBREAK, MASK_C_EBREAK, match_opcode, INSN_ALIAS },
