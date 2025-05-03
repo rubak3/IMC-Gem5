@@ -390,9 +390,6 @@ const struct riscv_opcode riscv_opcodes[] =
 {"pause",       0, INSN_CLASS_ZIHINTPAUSE, "", MATCH_PAUSE, MASK_PAUSE, match_opcode, 0 },
 
 /* Basic RVI instructions and aliases.  */
-//{"addmod",	0, INSN_CLASS_I, "s,t,r", MATCH_ADDMOD, MASK_ADDMOD, match_opcode, 0},
-//{"addmod",	0, INSN_CLASS_I, "d,s,t,r", MATCH_ADDMOD, MASK_ADDMOD, match_opcode, 0},
-//{"addmod2",	0, INSN_CLASS_I, "s", MATCH_ADDMOD2, MASK_ADDMOD2, match_opcode, 0},
 {"addmod",	0, INSN_CLASS_C, "s,t,r,l", MATCH_ADDMOD, MASK_ADDMOD, match_opcode, 0},
 {"submod",	0, INSN_CLASS_C, "s,t,r,l", MATCH_SUBMOD, MASK_SUBMOD, match_opcode, 0},
 {"mulmod",	0, INSN_CLASS_C, "s,t,r,l", MATCH_MULMOD, MASK_MULMOD, match_opcode, 0},
