@@ -563,9 +563,9 @@ decode QUADRANT default Unknown::unknown() {
                         );
 
                         // Create the packet and attach data
-                        PacketPtr pkt = new Packet(req, MemCmd::ReadReq);
+                        PacketPtr pkt = new Packet(req, MemCmd::WriteReq);
                         pkt->dataStatic(operands);
-                        dataPort.sendFunctional(pkt);
+                        dataPort.sendTimingReq(pkt);
 
                         //std::cout << "[Addmod] Rs1=" << Rs1_sd
                           //        << ", Rs2=" << Rs2_sd
@@ -652,9 +652,9 @@ decode QUADRANT default Unknown::unknown() {
                         );
 
                         // Create the packet and attach data
-                        PacketPtr pkt = new Packet(req, MemCmd::ReadReq);
+                        PacketPtr pkt = new Packet(req, MemCmd::WriteReq);
                         pkt->dataStatic(operands);
-                        dataPort.sendFunctional(pkt);
+                        dataPort.sendTimingReq(pkt);
 
                         //std::cout << "[Addmod] Rs1=" << Rs1_sd
                           //        << ", Rs2=" << Rs2_sd
@@ -663,6 +663,94 @@ decode QUADRANT default Unknown::unknown() {
                                 //  << std::endl;
                     }});
 
+                    0x03: Submod({{
+                        // Execute in memory (IMC)
+                        ThreadContext *tc = xc->tcBase();
+                        BaseCPU *cpu = tc->getCpuPtr();
+                        RequestPort& dataPort = dynamic_cast<RequestPort&>(cpu->getDataPort());
+
+                        uint64_t a = static_cast<uint64_t>(Rs1_sd);
+                        uint64_t b = static_cast<uint64_t>(Rs2_sd);
+                        uint64_t c = static_cast<uint64_t>(Rs3_sd);
+                        uint64_t d = static_cast<uint64_t>(Rs4_sd);
+
+                        BaseMMU *mmu = tc->getMMUPtr();
+
+                        // Step 2: Create Request objects for each address
+                        Request::Flags flags;
+                        RequestPtr req_a = std::make_shared<Request>(a, sizeof(uint64_t), flags, tc->contextId());
+                        RequestPtr req_b = std::make_shared<Request>(b, sizeof(uint64_t), flags, tc->contextId());
+                        RequestPtr req_c = std::make_shared<Request>(c, sizeof(uint64_t), flags, tc->contextId());
+                        RequestPtr req_d = std::make_shared<Request>(d, sizeof(uint64_t), flags, tc->contextId());
+
+                        req_a->setVirt(
+                            a,
+                            sizeof(uint64_t),
+                            flags,
+                            tc->contextId(),
+                            tc->pcState().instAddr(),
+                            nullptr
+                        );
+                        req_b->setVirt(
+                            b,
+                            sizeof(uint64_t),
+                            flags,
+                            tc->contextId(),
+                            tc->pcState().instAddr(),
+                            nullptr
+                        );
+                        req_c->setVirt(
+                            c,
+                            sizeof(uint64_t),
+                            flags,
+                            tc->contextId(),
+                            tc->pcState().instAddr(),
+                            nullptr
+                        );
+                        req_d->setVirt(
+                            d,
+                            sizeof(uint64_t),
+                            flags,
+                            tc->contextId(),
+                            tc->pcState().instAddr(),
+                            nullptr
+                        );
+
+                        // Step 3: Ask gem5 to translate them (virtual → physical)
+                        Fault f1 = mmu->translateAtomic(req_a, tc, BaseMMU::Read);
+                        Fault f2 = mmu->translateAtomic(req_b, tc, BaseMMU::Read);
+                        Fault f3 = mmu->translateAtomic(req_c, tc, BaseMMU::Read);
+                        Fault f4 = mmu->translateAtomic(req_d, tc, BaseMMU::Read);
+
+                        // Step 5: Extract the physical addresses
+                        Addr pa_a = req_a->getPaddr();
+                        Addr pa_b = req_b->getPaddr();
+                        Addr pa_c = req_c->getPaddr();
+                        Addr pa_d = req_d->getPaddr();
+
+                        uint64_t operands[4] = { pa_a, pa_b, pa_c, pa_d };
+
+                        Addr addr = 0x00100100;
+
+                        //Request::Flags flags;
+                        flags.set(Request::SUBMOD);
+
+                        // Create the memory request
+                        RequestPtr req = std::make_shared<Request>(
+                            addr, sizeof(operands), flags, tc->contextId()
+                        );
+
+                        // Create the packet and attach data
+                        PacketPtr pkt = new Packet(req, MemCmd::WriteReq);
+                        pkt->dataStatic(operands);
+                        dataPort.sendTimingReq(pkt);
+
+                        //std::cout << "[Addmod] Rs1=" << Rs1_sd
+                          //        << ", Rs2=" << Rs2_sd
+                            //      << ", Rs3=" << Rs3_sd
+                              //    << ", Result=" << Rd
+                                //  << std::endl;
+                    }});
                 }
             }
 
@@ -734,9 +822,9 @@ decode QUADRANT default Unknown::unknown() {
                         );
 
                         // Create the packet and attach data
-                        PacketPtr pkt = new Packet(req, MemCmd::ReadReq);
+                        PacketPtr pkt = new Packet(req, MemCmd::WriteReq);
                         pkt->dataStatic(operands);
-                        dataPort.sendFunctional(pkt);
+                        dataPort.sendTimingReq(pkt);
 
                         //std::cout << "[Addmod] Rs1=" << Rs1_sd
                           //        << ", Rs2=" << Rs2_sd
@@ -811,9 +899,86 @@ decode QUADRANT default Unknown::unknown() {
                         );
 
                         // Create the packet and attach data
-                        PacketPtr pkt = new Packet(req, MemCmd::ReadReq);
+                        PacketPtr pkt = new Packet(req, MemCmd::WriteReq);
                         pkt->dataStatic(operands);
-                        dataPort.sendFunctional(pkt);
+                        dataPort.sendTimingReq(pkt);
+
+                        //std::cout << "[Addmod] Rs1=" << Rs1_sd
+                          //        << ", Rs2=" << Rs2_sd
+                            //      << ", Rs3=" << Rs3_sd
+                              //    << ", Result=" << Rd
+                                //  << std::endl;
+                    }});
+
+                    0x05: Cmpimc({{
+                        // Execute in memory (IMC)
+                        ThreadContext *tc = xc->tcBase();
+                        BaseCPU *cpu = tc->getCpuPtr();
+                        RequestPort& dataPort = dynamic_cast<RequestPort&>(cpu->getDataPort());
+
+                        uint64_t a = static_cast<uint64_t>(Rs1_sd);
+                        uint64_t b = static_cast<uint64_t>(Rs2_sd);
+                        uint64_t c = static_cast<uint64_t>(Rs4_sd);
+
+                        BaseMMU *mmu = tc->getMMUPtr();
+
+                        // Step 2: Create Request objects for each address
+                        Request::Flags flags;
+                        RequestPtr req_a = std::make_shared<Request>(a, sizeof(uint64_t), flags, tc->contextId());
+                        RequestPtr req_b = std::make_shared<Request>(b, sizeof(uint64_t), flags, tc->contextId());
+                        RequestPtr req_c = std::make_shared<Request>(c, sizeof(uint64_t), flags, tc->contextId());
+
+                        req_a->setVirt(
+                            a,
+                            sizeof(uint64_t),
+                            flags,
+                            tc->contextId(),
+                            tc->pcState().instAddr(),
+                            nullptr
+                        );
+                        req_b->setVirt(
+                            b,
+                            sizeof(uint64_t),
+                            flags,
+                            tc->contextId(),
+                            tc->pcState().instAddr(),
+                            nullptr
+                        );
+                        req_c->setVirt(
+                            c,
+                            sizeof(uint64_t),
+                            flags,
+                            tc->contextId(),
+                            tc->pcState().instAddr(),
+                            nullptr
+                        );
+
+                        // Step 3: Ask gem5 to translate them (virtual → physical)
+                        Fault f1 = mmu->translateAtomic(req_a, tc, BaseMMU::Read);
+                        Fault f2 = mmu->translateAtomic(req_b, tc, BaseMMU::Read);
+                        Fault f3 = mmu->translateAtomic(req_c, tc, BaseMMU::Read);
+
+                        // Step 5: Extract the physical addresses
+                        Addr pa_a = req_a->getPaddr();
+                        Addr pa_b = req_b->getPaddr();
+                        Addr pa_c = req_c->getPaddr();
+
+                        uint64_t operands[3] = { pa_a, pa_b, pa_c};
+
+                        Addr addr = 0x00100100;
+
+                        //Request::Flags flags;
+                        flags.set(Request::CMPIMC);
+
+                        // Create the memory request
+                        RequestPtr req = std::make_shared<Request>(
+                            addr, sizeof(operands), flags, tc->contextId()
+                        );
+
+                        // Create the packet and attach data
+                        PacketPtr pkt = new Packet(req, MemCmd::WriteReq);
+                        pkt->dataStatic(operands);
+                        dataPort.sendTimingReq(pkt);
 
                         //std::cout << "[Addmod] Rs1=" << Rs1_sd
                           //        << ", Rs2=" << Rs2_sd
