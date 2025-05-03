@@ -105,7 +105,7 @@ SimpleMemory::recvFunctional(PacketPtr pkt)
     pkt->pushLabel(name());
 
     if (pkt->req->getFlags() & Request::ADDMOD) {
-        std::cout << "[IMC] Performing in-memory compute for Addmod!" << std::endl;
+        std::cout << "[IMC] Performing in-memory compute for Addmod" << std::endl;
 
         //Addr addr_x = 0x1b7c0;
         //uint64_t x_value = 1;
@@ -144,8 +144,60 @@ SimpleMemory::recvFunctional(PacketPtr pkt)
         uint64_t result = (val_a + val_b) % val_c;
         memcpy(hostAddr + (addr_d - baseAddr), &result, sizeof(uint64_t));
 
-        std::cout << "[Addmod IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c
-                  << ", result = " << result << std::endl;
+        //std::cout << "[Addmod IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c
+          //        << ", result = " << result << std::endl;
+
+        //if (pkt->isRead()) {
+            //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
+        //}
+
+        pkt->makeAtomicResponse();
+        return;
+    }
+
+    else if (pkt->req->getFlags() & Request::SUBMOD) {
+        std::cout << "[IMC] Performing in-memory compute for Submod" << std::endl;
+
+        //Addr addr_x = 0x1b7c0;
+        //uint64_t x_value = 1;
+        //memcpy(pmemAddr + (addr_x - this->getAddrRange().start()), &x_value, sizeof(uint64_t));
+        //std::cout << "[IMC] Wrote x = " << x_value
+          //<< " to physical address 0x" << std::hex << addr_x << std::endl;
+
+
+        const uint8_t* data = pkt->getConstPtr<uint8_t>();
+
+        Addr addr_a, addr_b, addr_c, addr_d;
+        memcpy(&addr_a, data, sizeof(uint64_t));
+        memcpy(&addr_b, data + 8, sizeof(uint64_t));
+        memcpy(&addr_c, data + 16, sizeof(uint64_t));
+        memcpy(&addr_d, data + 24, sizeof(uint64_t));
+
+        uint8_t* hostAddr = pmemAddr;  // or whatever your backing pointer is
+        Addr baseAddr = this->getAddrRange().start(); // base of memory range
+
+        //std::cout << "[IMC] hostAddr = " << hostAddr << std::endl;
+
+        //std::cout << "[IMC] addr_a = " << addr_a << ", addr_b = " << addr_b << ", addr_c = " << addr_c << std::endl;
+
+        int64_t val_a, val_b, val_c;
+        memcpy(&val_a, hostAddr + (addr_a - baseAddr), sizeof(int64_t));
+        memcpy(&val_b, hostAddr + (addr_b - baseAddr), sizeof(int64_t));
+        memcpy(&val_c, hostAddr + (addr_c - baseAddr), sizeof(int64_t));
+
+        //std::cout << "[IMC] addr_a = 0x" << std::hex << addr_a << ", offset = 0x" << (addr_a - baseAddr) << std::endl;
+        
+        //std::cout << "*(hostAddr + offset) = 0x" << *(uint64_t*)(hostAddr + (addr_a - baseAddr)) << std::endl;
+
+
+        //std::cout << "[IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c << std::endl;
+
+        int64_t sub = val_a - val_b;
+        int64_t result = ((sub % val_c) + val_c) % val_c;
+        memcpy(hostAddr + (addr_d - baseAddr), &result, sizeof(int64_t));
+
+        //std::cout << "[Addmod IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c
+          //        << ", result = " << result << std::endl;
 
         //if (pkt->isRead()) {
             //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
@@ -156,7 +208,7 @@ SimpleMemory::recvFunctional(PacketPtr pkt)
     }
 
     else if (pkt->req->getFlags() & Request::MULMOD) {
-        std::cout << "[IMC] Performing in-memory compute for Mulmod!" << std::endl;
+        std::cout << "[IMC] Performing in-memory compute for Mulmod" << std::endl;
 
         //Addr addr_x = 0x1b7c0;
         //uint64_t x_value = 1;
@@ -195,8 +247,8 @@ SimpleMemory::recvFunctional(PacketPtr pkt)
         uint64_t result = (val_a * val_b) % val_c;
         memcpy(hostAddr + (addr_d - baseAddr), &result, sizeof(uint64_t));
 
-        std::cout << "[Mulmod IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c
-                  << ", result = " << result << std::endl;
+        //std::cout << "[Mulmod IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c
+          //        << ", result = " << result << std::endl;
 
         //if (pkt->isRead()) {
             //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
@@ -207,7 +259,7 @@ SimpleMemory::recvFunctional(PacketPtr pkt)
     }
 
     else if (pkt->req->getFlags() & Request::MULIMC) {
-        std::cout << "[IMC] Performing in-memory compute for Mulimc!" << std::endl;
+        std::cout << "[IMC] Performing in-memory compute for Mulimc" << std::endl;
 
         //Addr addr_x = 0x1b7c0;
         //uint64_t x_value = 1;
@@ -244,8 +296,8 @@ SimpleMemory::recvFunctional(PacketPtr pkt)
         uint64_t result = val_a * val_b;
         memcpy(hostAddr + (addr_c - baseAddr), &result, sizeof(uint64_t));
 
-        std::cout << "[Mulimc IMC] a = " << val_a << ", b = " << val_b
-                  << ", result = " << result << std::endl;
+        //std::cout << "[Mulimc IMC] a = " << val_a << ", b = " << val_b
+          //        << ", result = " << result << std::endl;
 
         //if (pkt->isRead()) {
             //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
@@ -256,7 +308,7 @@ SimpleMemory::recvFunctional(PacketPtr pkt)
     }
 
     else if (pkt->req->getFlags() & Request::INVMOD) {
-        std::cout << "[IMC] Performing in-memory compute for Invmod!" << std::endl;
+        std::cout << "[IMC] Performing in-memory compute for Invmod" << std::endl;
 
         //Addr addr_x = 0x1b7c0;
         //uint64_t x_value = 1;
@@ -314,8 +366,64 @@ SimpleMemory::recvFunctional(PacketPtr pkt)
 
         memcpy(hostAddr + (addr_c - baseAddr), &result, sizeof(uint64_t));
 
-        std::cout << "[Invmod IMC] a = " << val_a << ", b = " << val_b
-                  << ", result = " << result << std::endl;
+        //std::cout << "[Invmod IMC] a = " << val_a << ", b = " << val_b
+          //        << ", result = " << result << std::endl;
+
+        //if (pkt->isRead()) {
+            //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
+        //}
+
+        pkt->makeAtomicResponse();
+        return;
+    }
+
+    else if (pkt->req->getFlags() & Request::CMPIMC) {
+        std::cout << "[IMC] Performing in-memory compute for Cmpimc" << std::endl;
+
+        //Addr addr_x = 0x1b7c0;
+        //uint64_t x_value = 1;
+        //memcpy(pmemAddr + (addr_x - this->getAddrRange().start()), &x_value, sizeof(uint64_t));
+        //std::cout << "[IMC] Wrote x = " << x_value
+          //<< " to physical address 0x" << std::hex << addr_x << std::endl;
+
+
+        const uint8_t* data = pkt->getConstPtr<uint8_t>();
+
+        Addr addr_a, addr_b, addr_c;
+        memcpy(&addr_a, data, sizeof(uint64_t));
+        memcpy(&addr_b, data + 8, sizeof(uint64_t));
+        memcpy(&addr_c, data + 16, sizeof(uint64_t));
+
+        uint8_t* hostAddr = pmemAddr;  // or whatever your backing pointer is
+        Addr baseAddr = this->getAddrRange().start(); // base of memory range
+
+        //std::cout << "[IMC] hostAddr = " << hostAddr << std::endl;
+
+        //std::cout << "[IMC] addr_a = " << addr_a << ", addr_b = " << addr_b << ", addr_c = " << addr_c << std::endl;
+
+        uint64_t val_a, val_b;
+        memcpy(&val_a, hostAddr + (addr_a - baseAddr), sizeof(uint64_t));
+        memcpy(&val_b, hostAddr + (addr_b - baseAddr), sizeof(uint64_t));
+
+        //std::cout << "[IMC] addr_a = 0x" << std::hex << addr_a << ", offset = 0x" << (addr_a - baseAddr) << std::endl;
+        
+        //std::cout << "*(hostAddr + offset) = 0x" << *(uint64_t*)(hostAddr + (addr_a - baseAddr)) << std::endl;
+
+
+        //std::cout << "[IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c << std::endl;
+
+        uint64_t result;
+        if (val_a == val_b) {
+            result = 1;
+        } else {
+            result = 0;
+        }
+
+
+        memcpy(hostAddr + (addr_c - baseAddr), &result, sizeof(uint64_t));
+
+        //std::cout << "[Invmod IMC] a = " << val_a << ", b = " << val_b
+          //        << ", result = " << result << std::endl;
 
         //if (pkt->isRead()) {
             //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
@@ -391,6 +499,329 @@ SimpleMemory::recvTimingReq(PacketPtr pkt)
     if (duration != 0) {
         schedule(releaseEvent, curTick() + duration);
         isBusy = true;
+    }
+
+    //IMC
+    if (pkt->req->getFlags() & Request::ADDMOD) {
+        std::cout << "[IMC] Performing in-memory compute for Addmod" << std::endl;
+
+        //Addr addr_x = 0x1b7c0;
+        //uint64_t x_value = 1;
+        //memcpy(pmemAddr + (addr_x - this->getAddrRange().start()), &x_value, sizeof(uint64_t));
+        //std::cout << "[IMC] Wrote x = " << x_value
+          //<< " to physical address 0x" << std::hex << addr_x << std::endl;
+
+
+        const uint8_t* data = pkt->getConstPtr<uint8_t>();
+
+        Addr addr_a, addr_b, addr_c, addr_d;
+        memcpy(&addr_a, data, sizeof(uint64_t));
+        memcpy(&addr_b, data + 8, sizeof(uint64_t));
+        memcpy(&addr_c, data + 16, sizeof(uint64_t));
+        memcpy(&addr_d, data + 24, sizeof(uint64_t));
+
+        uint8_t* hostAddr = pmemAddr;  // or whatever your backing pointer is
+        Addr baseAddr = this->getAddrRange().start(); // base of memory range
+
+        //std::cout << "[IMC] hostAddr = " << hostAddr << std::endl;
+
+        //std::cout << "[IMC] addr_a = " << addr_a << ", addr_b = " << addr_b << ", addr_c = " << addr_c << std::endl;
+
+        uint64_t val_a, val_b, val_c;
+        memcpy(&val_a, hostAddr + (addr_a - baseAddr), sizeof(uint64_t));
+        memcpy(&val_b, hostAddr + (addr_b - baseAddr), sizeof(uint64_t));
+        memcpy(&val_c, hostAddr + (addr_c - baseAddr), sizeof(uint64_t));
+
+        //std::cout << "[IMC] addr_a = 0x" << std::hex << addr_a << ", offset = 0x" << (addr_a - baseAddr) << std::endl;
+        
+        //std::cout << "*(hostAddr + offset) = 0x" << *(uint64_t*)(hostAddr + (addr_a - baseAddr)) << std::endl;
+
+
+        //std::cout << "[IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c << std::endl;
+
+        uint64_t result = (val_a + val_b) % val_c;
+        memcpy(hostAddr + (addr_d - baseAddr), &result, sizeof(uint64_t));
+
+        //std::cout << "[Addmod IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c
+          //        << ", result = " << result << std::endl;
+
+        //if (pkt->isRead()) {
+            //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
+        //}
+
+        return true;
+    }
+    else if (pkt->req->getFlags() & Request::SUBMOD) {
+        std::cout << "[IMC] Performing in-memory compute for Submod" << std::endl;
+
+        //Addr addr_x = 0x1b7c0;
+        //uint64_t x_value = 1;
+        //memcpy(pmemAddr + (addr_x - this->getAddrRange().start()), &x_value, sizeof(uint64_t));
+        //std::cout << "[IMC] Wrote x = " << x_value
+          //<< " to physical address 0x" << std::hex << addr_x << std::endl;
+
+
+        const uint8_t* data = pkt->getConstPtr<uint8_t>();
+
+        Addr addr_a, addr_b, addr_c, addr_d;
+        memcpy(&addr_a, data, sizeof(uint64_t));
+        memcpy(&addr_b, data + 8, sizeof(uint64_t));
+        memcpy(&addr_c, data + 16, sizeof(uint64_t));
+        memcpy(&addr_d, data + 24, sizeof(uint64_t));
+
+        uint8_t* hostAddr = pmemAddr;  // or whatever your backing pointer is
+        Addr baseAddr = this->getAddrRange().start(); // base of memory range
+
+        //std::cout << "[IMC] hostAddr = " << hostAddr << std::endl;
+
+        //std::cout << "[IMC] addr_a = " << addr_a << ", addr_b = " << addr_b << ", addr_c = " << addr_c << std::endl;
+
+        int64_t val_a, val_b, val_c;
+        memcpy(&val_a, hostAddr + (addr_a - baseAddr), sizeof(int64_t));
+        memcpy(&val_b, hostAddr + (addr_b - baseAddr), sizeof(int64_t));
+        memcpy(&val_c, hostAddr + (addr_c - baseAddr), sizeof(int64_t));
+
+        //std::cout << "[IMC] addr_a = 0x" << std::hex << addr_a << ", offset = 0x" << (addr_a - baseAddr) << std::endl;
+        
+        //std::cout << "*(hostAddr + offset) = 0x" << *(uint64_t*)(hostAddr + (addr_a - baseAddr)) << std::endl;
+
+
+        //std::cout << "[IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c << std::endl;
+
+        int64_t sub = val_a - val_b;
+        int64_t result = ((sub % val_c) + val_c) % val_c;
+        memcpy(hostAddr + (addr_d - baseAddr), &result, sizeof(int64_t));
+
+        //std::cout << "[Addmod IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c
+          //        << ", result = " << result << std::endl;
+
+        //if (pkt->isRead()) {
+            //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
+        //}
+
+        return true;
+    }
+
+    else if (pkt->req->getFlags() & Request::MULMOD) {
+        std::cout << "[IMC] Performing in-memory compute for Mulmod" << std::endl;
+
+        //Addr addr_x = 0x1b7c0;
+        //uint64_t x_value = 1;
+        //memcpy(pmemAddr + (addr_x - this->getAddrRange().start()), &x_value, sizeof(uint64_t));
+        //std::cout << "[IMC] Wrote x = " << x_value
+          //<< " to physical address 0x" << std::hex << addr_x << std::endl;
+
+
+        const uint8_t* data = pkt->getConstPtr<uint8_t>();
+
+        Addr addr_a, addr_b, addr_c, addr_d;
+        memcpy(&addr_a, data, sizeof(uint64_t));
+        memcpy(&addr_b, data + 8, sizeof(uint64_t));
+        memcpy(&addr_c, data + 16, sizeof(uint64_t));
+        memcpy(&addr_d, data + 24, sizeof(uint64_t));
+
+        uint8_t* hostAddr = pmemAddr;  // or whatever your backing pointer is
+        Addr baseAddr = this->getAddrRange().start(); // base of memory range
+
+        //std::cout << "[IMC] hostAddr = " << hostAddr << std::endl;
+
+        //std::cout << "[IMC] addr_a = " << addr_a << ", addr_b = " << addr_b << ", addr_c = " << addr_c << std::endl;
+
+        uint64_t val_a, val_b, val_c;
+        memcpy(&val_a, hostAddr + (addr_a - baseAddr), sizeof(uint64_t));
+        memcpy(&val_b, hostAddr + (addr_b - baseAddr), sizeof(uint64_t));
+        memcpy(&val_c, hostAddr + (addr_c - baseAddr), sizeof(uint64_t));
+
+        //std::cout << "[IMC] addr_a = 0x" << std::hex << addr_a << ", offset = 0x" << (addr_a - baseAddr) << std::endl;
+        
+        //std::cout << "*(hostAddr + offset) = 0x" << *(uint64_t*)(hostAddr + (addr_a - baseAddr)) << std::endl;
+
+
+        //std::cout << "[IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c << std::endl;
+
+        uint64_t result = (val_a * val_b) % val_c;
+        memcpy(hostAddr + (addr_d - baseAddr), &result, sizeof(uint64_t));
+
+        //std::cout << "[Mulmod IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c
+          //        << ", result = " << result << std::endl;
+
+        //if (pkt->isRead()) {
+            //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
+        //}
+
+        return true;
+    }
+
+    else if (pkt->req->getFlags() & Request::MULIMC) {
+        std::cout << "[IMC] Performing in-memory compute for Mulimc" << std::endl;
+
+        //Addr addr_x = 0x1b7c0;
+        //uint64_t x_value = 1;
+        //memcpy(pmemAddr + (addr_x - this->getAddrRange().start()), &x_value, sizeof(uint64_t));
+        //std::cout << "[IMC] Wrote x = " << x_value
+          //<< " to physical address 0x" << std::hex << addr_x << std::endl;
+
+
+        const uint8_t* data = pkt->getConstPtr<uint8_t>();
+
+        Addr addr_a, addr_b, addr_c;
+        memcpy(&addr_a, data, sizeof(uint64_t));
+        memcpy(&addr_b, data + 8, sizeof(uint64_t));
+        memcpy(&addr_c, data + 16, sizeof(uint64_t));
+
+        uint8_t* hostAddr = pmemAddr;  // or whatever your backing pointer is
+        Addr baseAddr = this->getAddrRange().start(); // base of memory range
+
+        //std::cout << "[IMC] hostAddr = " << hostAddr << std::endl;
+
+        //std::cout << "[IMC] addr_a = " << addr_a << ", addr_b = " << addr_b << ", addr_c = " << addr_c << std::endl;
+
+        uint64_t val_a, val_b;
+        memcpy(&val_a, hostAddr + (addr_a - baseAddr), sizeof(uint64_t));
+        memcpy(&val_b, hostAddr + (addr_b - baseAddr), sizeof(uint64_t));
+
+        //std::cout << "[IMC] addr_a = 0x" << std::hex << addr_a << ", offset = 0x" << (addr_a - baseAddr) << std::endl;
+        
+        //std::cout << "*(hostAddr + offset) = 0x" << *(uint64_t*)(hostAddr + (addr_a - baseAddr)) << std::endl;
+
+
+        //std::cout << "[IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c << std::endl;
+
+        uint64_t result = val_a * val_b;
+        memcpy(hostAddr + (addr_c - baseAddr), &result, sizeof(uint64_t));
+
+        //std::cout << "[Mulimc IMC] a = " << val_a << ", b = " << val_b
+          //        << ", result = " << result << std::endl;
+
+        //if (pkt->isRead()) {
+            //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
+        //}
+
+        return true;
+    }
+
+    else if (pkt->req->getFlags() & Request::INVMOD) {
+        std::cout << "[IMC] Performing in-memory compute for Invmod" << std::endl;
+
+        //Addr addr_x = 0x1b7c0;
+        //uint64_t x_value = 1;
+        //memcpy(pmemAddr + (addr_x - this->getAddrRange().start()), &x_value, sizeof(uint64_t));
+        //std::cout << "[IMC] Wrote x = " << x_value
+          //<< " to physical address 0x" << std::hex << addr_x << std::endl;
+
+
+        const uint8_t* data = pkt->getConstPtr<uint8_t>();
+
+        Addr addr_a, addr_b, addr_c;
+        memcpy(&addr_a, data, sizeof(uint64_t));
+        memcpy(&addr_b, data + 8, sizeof(uint64_t));
+        memcpy(&addr_c, data + 16, sizeof(uint64_t));
+
+        uint8_t* hostAddr = pmemAddr;  // or whatever your backing pointer is
+        Addr baseAddr = this->getAddrRange().start(); // base of memory range
+
+        //std::cout << "[IMC] hostAddr = " << hostAddr << std::endl;
+
+        //std::cout << "[IMC] addr_a = " << addr_a << ", addr_b = " << addr_b << ", addr_c = " << addr_c << std::endl;
+
+        uint64_t val_a, val_b;
+        memcpy(&val_a, hostAddr + (addr_a - baseAddr), sizeof(uint64_t));
+        memcpy(&val_b, hostAddr + (addr_b - baseAddr), sizeof(uint64_t));
+
+        //std::cout << "[IMC] addr_a = 0x" << std::hex << addr_a << ", offset = 0x" << (addr_a - baseAddr) << std::endl;
+        
+        //std::cout << "*(hostAddr + offset) = 0x" << *(uint64_t*)(hostAddr + (addr_a - baseAddr)) << std::endl;
+
+
+        //std::cout << "[IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c << std::endl;
+
+        uint64_t result;
+        int m0 = val_b, t, q;
+        int x0 = 0, x1 = 1;
+        if (val_b == 1) {
+            result = 0;
+        }
+        else {
+            while (val_a > 1) {
+                q = val_a / val_b;
+                t = val_b;
+                val_b = val_a % val_b, val_a = t;
+                t = x0;
+                x0 = x1 - q * x0;
+                x1 = t;
+            }
+            if (x1 < 0) {
+                x1 += m0;
+            }
+            result = x1;
+        }
+
+
+        memcpy(hostAddr + (addr_c - baseAddr), &result, sizeof(uint64_t));
+
+        //std::cout << "[Invmod IMC] a = " << val_a << ", b = " << val_b
+          //        << ", result = " << result << std::endl;
+
+        //if (pkt->isRead()) {
+            //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
+        //}
+
+        return true;
+    }
+
+    else if (pkt->req->getFlags() & Request::CMPIMC) {
+        std::cout << "[IMC] Performing in-memory compute for Cmpimc" << std::endl;
+
+        //Addr addr_x = 0x1b7c0;
+        //uint64_t x_value = 1;
+        //memcpy(pmemAddr + (addr_x - this->getAddrRange().start()), &x_value, sizeof(uint64_t));
+        //std::cout << "[IMC] Wrote x = " << x_value
+          //<< " to physical address 0x" << std::hex << addr_x << std::endl;
+
+
+        const uint8_t* data = pkt->getConstPtr<uint8_t>();
+
+        Addr addr_a, addr_b, addr_c;
+        memcpy(&addr_a, data, sizeof(uint64_t));
+        memcpy(&addr_b, data + 8, sizeof(uint64_t));
+        memcpy(&addr_c, data + 16, sizeof(uint64_t));
+
+        uint8_t* hostAddr = pmemAddr;  // or whatever your backing pointer is
+        Addr baseAddr = this->getAddrRange().start(); // base of memory range
+
+        //std::cout << "[IMC] hostAddr = " << hostAddr << std::endl;
+
+        //std::cout << "[IMC] addr_a = " << addr_a << ", addr_b = " << addr_b << ", addr_c = " << addr_c << std::endl;
+
+        uint64_t val_a, val_b;
+        memcpy(&val_a, hostAddr + (addr_a - baseAddr), sizeof(uint64_t));
+        memcpy(&val_b, hostAddr + (addr_b - baseAddr), sizeof(uint64_t));
+
+        //std::cout << "[IMC] addr_a = 0x" << std::hex << addr_a << ", offset = 0x" << (addr_a - baseAddr) << std::endl;
+        
+        //std::cout << "*(hostAddr + offset) = 0x" << *(uint64_t*)(hostAddr + (addr_a - baseAddr)) << std::endl;
+
+
+        //std::cout << "[IMC] a = " << val_a << ", b = " << val_b << ", c = " << val_c << std::endl;
+
+        uint64_t result;
+        if (val_a == val_b) {
+            result = 1;
+        } else {
+            result = 0;
+        }
+
+
+        memcpy(hostAddr + (addr_c - baseAddr), &result, sizeof(uint64_t));
+
+        //std::cout << "[Invmod IMC] a = " << val_a << ", b = " << val_b
+          //        << ", result = " << result << std::endl;
+
+        //if (pkt->isRead()) {
+            //memcpy(pkt->getPtr<uint8_t>(), &result, sizeof(result));
+        //}
+
+        return true;
     }
 
     // go ahead and deal with the packet and put the response in the
