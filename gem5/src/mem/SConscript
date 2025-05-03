@@ -111,6 +111,9 @@ Source('translating_port_proxy.cc')
 Source('se_translating_port_proxy.cc')
 Source('page_table.cc')
 
+SimObject('PIMCtrl.py', sim_objects=['PIMCtrl'])
+Source('pim_mem.cc')
+
 if env['HAVE_DRAMSIM']:
     SimObject('DRAMSim2.py', sim_objects=['DRAMSim2'])
     Source('dramsim2_wrapper.cc')
